@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2006 The Android Open Source Project
+ * Copyright (C) 2016-2019 The MoKee Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,6 +111,8 @@ import com.android.internal.telephony.uicc.UiccProfile;
 import com.android.internal.telephony.util.NotificationChannelController;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
+
+import com.mokee.utils.OperatorUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -2189,9 +2192,9 @@ public class ServiceStateTracker extends Handler {
                         // FIXME: Giving brandOverride higher precedence, is this desired?
                         if (brandOverride != null) {
                             log("EVENT_POLL_STATE_OPERATOR: use brandOverride=" + brandOverride);
-                            mNewSS.setOperatorName(brandOverride, brandOverride, opNames[2]);
+                            mNewSS.setOperatorName(OperatorUtils.operatorReplace(brandOverride, opNames[2]), brandOverride, opNames[2]);
                         } else {
-                            mNewSS.setOperatorName(opNames[0], opNames[1], opNames[2]);
+                            mNewSS.setOperatorName(OperatorUtils.operatorReplace(opNames[0], opNames[2]), opNames[1], opNames[2]);
                         }
                     }
                 } else {
@@ -2214,12 +2217,12 @@ public class ServiceStateTracker extends Handler {
 
                         if (!mIsSubscriptionFromRuim) {
                             // NV device (as opposed to CSIM)
-                            mNewSS.setOperatorName(opNames[0], opNames[1], opNames[2]);
+                            mNewSS.setOperatorName(OperatorUtils.operatorReplace(opNames[0], opNames[2]), opNames[1], opNames[2]);
                         } else {
                             if (brandOverride != null) {
-                                mNewSS.setOperatorName(brandOverride, brandOverride, opNames[2]);
+                                mNewSS.setOperatorName(OperatorUtils.operatorReplace(brandOverride, opNames[2]), brandOverride, opNames[2]);
                             } else {
-                                mNewSS.setOperatorName(opNames[0], opNames[1], opNames[2]);
+                                mNewSS.setOperatorName(OperatorUtils.operatorReplace(opNames[0], opNames[2]), opNames[1], opNames[2]);
                             }
                         }
                     } else {
@@ -2655,7 +2658,7 @@ public class ServiceStateTracker extends Handler {
                         "of service, set plmn='" + plmn + "'");
             } else if (combinedRegState == ServiceState.STATE_IN_SERVICE) {
                 // In either home or roaming service
-                plmn = mSS.getOperatorAlpha();
+                plmn = OperatorUtils.operatorReplace(mSS.getOperatorAlphaLong(), mSS.getOperatorNumeric());
                 showPlmn = !TextUtils.isEmpty(plmn) &&
                         ((rule & CARRIER_NAME_DISPLAY_BITMASK_SHOW_PLMN)
                                 == CARRIER_NAME_DISPLAY_BITMASK_SHOW_PLMN);
@@ -3561,7 +3564,7 @@ public class ServiceStateTracker extends Handler {
             return operatorBrandOverride;
         }
 
-        String carrierName = mIccRecords != null ? mIccRecords.getServiceProviderName() : "";
+        String carrierName = mIccRecords != null ? OperatorUtils.operatorReplace(mIccRecords.getServiceProviderName(), mIccRecords.getOperatorNumeric()) : "";
         PersistableBundle config = getCarrierConfig();
         if (config.getBoolean(CarrierConfigManager.KEY_CARRIER_NAME_OVERRIDE_BOOL)
                 || TextUtils.isEmpty(carrierName)) {
