@@ -774,10 +774,12 @@ public class PhoneSwitcher extends Handler {
             }
         }
 
-        if (!hasAnyActiveSubscription) {
-            transitionToEmergencyPhone();
-        } else {
-            if (VDBG) log("Found an active subscription");
+        if (mNumPhones > 0) {
+            if (!hasAnyActiveSubscription) {
+                transitionToEmergencyPhone();
+            } else {
+                if (VDBG) log("Found an active subscription");
+            }
         }
 
         // Check if phoneId for preferred data is changed.
